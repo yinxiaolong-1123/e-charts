@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>我的第一个 HTML 页面</title>
+    <link rel="shortcut icon" href="../resources/favicon.ico" th:href="@{/static/favicon.ico}"/>
+<!--    引入echarts-->
+    <script src="../assets/js/echarts.min.js"></script>
+    <script src="../vendor/jquery/jquery.js"></script>
+</head>
+
+<body>
+<div id="main" style="width: 600px;height:400px;position:absolute;top:50%;left: 50%;margin-top: -200px;margin-left: -300px;"></div>
+
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+
+    $(function (){
+        $.get("172.16.3.218:8080/search/糖尿病",function (data){
+            const color1 = '#006acc';
+            const color2 = '#ff7d18';
+            const color3 = '#10a050';
+            console.log(data);
+            // alert("Data Load:"+JSON.stringify(data));
+            console.log(data.nodes);
+            data.nodes.forEach(node => {
+                if (node.category === 0) {
+                    node.symbolSize = 100;
+                    node.itemStyle = {
+                        color: color1
+                    };
+                } else if (node.category === 1) {
+                    node.itemStyle = {
+                        color: color2
+                    };
+                }
+            });
+
+            data.links.forEach(link => {
+                link.label = {
+                    align: 'center',
+                    fontSize: 12
+                };
+
+                link.lineStyle = {
+                    color: color1
+                }
+            });
+
+            let categories = [{
+                name: '公司',
+                itemStyle: {
+                    color: color1
+                }
+            },
+                {
+                    name: '董事',
+                    itemStyle: {
+                        color: color2
+                    }
+                }
+            ]
+
+            option = {
+                title: {
+                    text: '知识图谱',
+                },
+                legend: [{
+                    data: categories.map(x => x.name),
+                }],
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    symbolSize: 58,
+                    draggable: true,
+                    roam: true,
+                    focusNodeAdjacency: true,
+                    categories: categories,
+                    edgeSymbol: ['', 'arrow'],
+                    // edgeSymbolSize: [80, 10],
+                    edgeLabel: {
+                        normal: {
+                            show: true,
+                            textStyle: {
+                                fontSize: 20
+                            },
+                            formatter(x) {
+                                return x.data.name;
+                            }
+                        }
+                    },
+                    label: {
+                        show: true
+                    },
+                    force: {
+                        repulsion: 2000,
+                        edgeLength: 120
+                    },
+                    data: data.nodes,
+                    links: data.links
+                }]
+            }
+            myChart.setOption(option);
+        })
+    })
+
+
+
+
+</script>
+</body>
+
+</html>
